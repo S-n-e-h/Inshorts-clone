@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inshorts Background App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #e6f2ff;
+      }
+
+      .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #ffffff;
+        padding: 10px 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .navbar-logo img {
+        height: 40px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 25px;
+        align-items: center;
+      }
+
+      .nav-links a {
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .search-box input {
+        padding: 5px 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+
+      .news-card {
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
+        max-width: 600px;
+        overflow: hidden;
+      }
+
+      .news-content {
+        padding: 20px;
+      }
+
+      .news-title {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .news-text {
+        font-size: 16px;
+        margin-bottom: 15px;
+        color: #444;
+      }
+
+      .read-more {
+        text-decoration: none;
+        color: #007BFF;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      /* ============ Mobile Style ============ */
+      @media (max-width: 767px) {
+      .news-container {
+        display: none;
+      }
+
+      .news-container-mobile {
+        height: 100vh;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+      }
+
+      .news-card {
+        height: calc(100vh / 3);
+        scroll-snap-align: start;
+        margin: 0;
+        border-radius: 0;
+        max-width: none;
+        box-shadow: none;
+        border-bottom: 1px solid #ccc;
+      }
+
+      .news-content {
+        padding: 15px;
+        overflow-y: auto;
+        height: 100%;
+      }
+
+      .navbar {
+        position: sticky;
+        top: 0;
+      }
+    }
+  </style>
+</head>
+  <body>
+    <div class="navbar">
+      <div class="navbar-logo">
+        <img src="https://assets.inshorts.com/website_assets/images/logo_inshorts.png" alt="Inshorts Logo" />
+      </div>
+      <div class="nav-links">
+        <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        <a href="news.html"><i class="fas fa-newspaper"></i>Full News</a>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Search news..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-container" id="newsContainer"></div>
+
+    <script>
+      const apiKey = "c5a0eaacb2d94a3f8779cb8503dc9980";
+      const container = document.getElementById("newsContainer");
+
+      fetch(`https://newsapi.org/v2/top-headlines?country=us&apiKey=${apiKey}`)
+        .then(res => res.json())
+        .then(data => {
+          data.articles.forEach(article => {
+            const card = document.createElement("div");
+            card.className = "news-card";
+            card.innerHTML = `
+              <div class="news-content">
+                <div class="news-title">${article.title}</div>
+                <div class="news-text">${article.description || "No description available."}</div>
+                <span class="read-more">AI generated text</span>
+              </div>
+            `;
+            card.querySelector(".read-more").addEventListener("click", () => {
+              localStorage.setItem("selectedNews", JSON.stringify(article));
+              window.location.href = "news.html";
+            });
+            container.appendChild(card);
+          });
+        })
+        .catch(err => console.error("Failed to fetch news:", err));
+
+      document.getElementById("searchInput").addEventListener("input", function () {
+        const keyword = this.value.toLowerCase();
+        document.querySelectorAll(".news-card").forEach(card => {
+          const title = card.querySelector(".news-title").textContent.toLowerCase();
+          const text = card.querySelector(".news-text").textContent.toLowerCase();
+          card.style.display = title.includes(keyword) || text.includes(keyword) ? "block" : "none";
+        });
+      });
+    </script>
+  </body>
+</html>

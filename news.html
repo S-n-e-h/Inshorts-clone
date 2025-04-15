@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Full News - Inshorts App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #e6f2ff;
+    }
+
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #ffffff;
+      padding: 10px 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .navbar-logo img {
+      height: 40px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: bold;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .news-card {
+      background-color: #ffffff;
+      border-radius: 15px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      margin: 30px auto;
+      max-width: 800px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .news-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+    }
+
+    .news-content {
+      padding: 30px;
+    }
+
+    .news-title {
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #222;
+    }
+
+    .news-full-text {
+      font-size: 18px;
+      color: #333;
+      white-space: pre-wrap;
+    }
+
+    .floating-options {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      z-index: 1000;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 180px;
+      display: none;
+    }
+
+    .floating-options button {
+      background-color: #007BFF;
+      border: none;
+      color: white;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .floating-options button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="navbar-logo">
+      <a href="index.html">
+        <img src="https://assets.inshorts.com/website_assets/images/logo_inshorts.png" alt="Inshorts Logo" />
+      </a>
+    </div>
+    <div class="nav-links">
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+      <a href="news.html"><i class="fas fa-newspaper"></i> News</a>
+    </div>
+  </div>
+
+  <div class="news-card" id="newsDetails">
+    <img class="news-image" id="newsImage" src="" alt="News Image" />
+    <div class="news-content">
+      <div class="news-title" id="newsTitle"></div>
+      <div class="news-full-text" id="fullArticleText">Loading summary...</div>
+    </div>
+  </div>
+
+  <div class="floating-options" id="optionsBox">
+    <button id="visitSource"><i class="fas fa-external-link-alt"></i> Visit Source</button>
+    <button id="shareLink"><i class="fas fa-share-alt"></i> Share Link</button>
+    <button id="bookmarkBtn"><i class="fas fa-bookmark"></i> Bookmark</button>
+    <button onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Go Home</button>
+  </div>
+
+  <script>
+    const article = JSON.parse(localStorage.getItem("selectedNews"));
+
+    if (article) {
+      document.getElementById("newsImage").src = article.image || article.urlToImage || "https://via.placeholder.com/800x300";
+      document.getElementById("newsTitle").textContent = article.title || "No title available";
+
+      const optionsBox = document.getElementById("optionsBox");
+      optionsBox.style.display = "flex";
+
+      document.getElementById("visitSource").onclick = () => {
+        if (article.url) window.open(article.url, "_blank");
+      };
+
+      document.getElementById("shareLink").onclick = () => {
+        if (article.url) {
+          navigator.clipboard.writeText(article.url)
+            .then(() => alert("Link copied!"))
+            .catch(() => alert("Failed to copy link."));
+        }
+      };
+
+      document.getElementById("bookmarkBtn").onclick = () => {
+        localStorage.setItem("bookmark", JSON.stringify(article));
+        alert("Bookmarked!");
+      };
+
+      // Fetch and display the summary
+      (async () => {
+        try {
+          const res = await fetch("http://localhost:5000/extract", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: article.url })
+          });
+
+          const data = await res.json();
+          document.getElementById("fullArticleText").textContent = data.summary || "Unable to summarize content.";
+        } catch (error) {
+          document.getElementById("fullArticleText").textContent = "Error fetching article content.";
+        }
+      })();
+    } else {
+      document.getElementById("newsDetails").innerHTML = `
+        <div class='news-content'>
+          <div class='news-title'>No news data found.</div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
