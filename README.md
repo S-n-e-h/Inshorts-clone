@@ -1,5 +1,5 @@
 Inshorts Clone
-This is a lightweight clone of the Inshorts news app. It fetches short news snippets from a public News API and provides access to the full news articles by scraping the source websites. For users who prefer concise information, the app also uses an AI model (DistilBART) to summarize full articles into approximately 60 words.
+This is a lightweight clone of the Inshorts news website. It fetches short news snippets from a public News API and provides access to the full news articles by scraping the source websites. For users who prefer concise information, the website also uses an AI model (DistilBART) to summarize full articles into approximately 60 words.
 
 Features
 Short news feed powered by a News API
